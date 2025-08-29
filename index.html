@@ -1279,7 +1279,7 @@
             }
         }
         
-        function simulateMovement() {
+function simulateMovement() {
     // Nu mai simula - folosește GPS real
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -1301,18 +1301,7 @@
             }
         );
     }
-}
-            
-            updatePosition({
-                coords: {
-                    latitude: lat,
-                    longitude: lng,
-                    speed: 0,
-                    heading: 0,
-                    altitude: 121.6
-                }
-            });
-            
+}     
             setInterval(() => {
                 angle += 0.1;
                 const radius = 0.0003;
