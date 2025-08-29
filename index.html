@@ -38,13 +38,14 @@
         }
         
         /* Map Container with Ambient Glow */
-        #map {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 100%;
-            background: #000;
-        }
+       #map {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    background: #000;
+    filter: brightness(0.3) contrast(1.2) saturate(0.2);
+}
         
         #map::before {
             content: '';
@@ -602,6 +603,18 @@
     
     <!-- Map Container -->
     <div id="map"></div>
+    <!-- Dark Overlay for Noir Effect -->
+<div style="
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: multiply;
+"></div>
     
     <!-- Particle Effects -->
     <div id="particles"></div>
