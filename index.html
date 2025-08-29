@@ -1299,42 +1299,29 @@ layers.forEach(layer => {
                 simulateMovement();
             }
         }
-        
         function simulateMovement() {
-            let lat = 44.4808;
-            let lng = 26.1246;
-            let angle = 0;
-            
-            updatePosition({
-                coords: {
-                    latitude: lat,
-                    longitude: lng,
-                    speed: 0,
-                    heading: 0,
-                    altitude: 121.6
-                }
-            });
-            
-            setInterval(() => {
-                angle += 0.1;
-                const radius = 0.0003;
-                lat = 44.4808 + Math.sin(angle) * radius;
-                lng = 26.1246 + Math.cos(angle) * radius;
-                
+    // Nu mai simula - folosește GPS real
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                updatePosition(position);
+            },
+            (error) => {
+                console.error('GPS Error:', error);
+                // Fallback București dacă GPS nu merge
                 updatePosition({
                     coords: {
-                        latitude: lat,
-                        longitude: lng,
-                        speed: Math.random() * 2,
-                        heading: (angle * 180 / Math.PI) % 360,
-                        altitude: 121.6 + Math.sin(angle * 2) * 5
+                        latitude: 44.4808,
+                        longitude: 26.1246,
+                        speed: 0,
+                        heading: 0,
+                        altitude: 121.6
                     }
                 });
-            }, 3000);
-        }
-        
-        async function updatePosition(position) {
-            const { latitude, longitude, speed, heading, altitude } = position.coords;
+            }
+        );
+    }
+}
             
             // Create or update user marker
             if (!userMarker) {
