@@ -38,14 +38,13 @@
         }
         
         /* Map Container with Ambient Glow */
-      #map {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 100%;
-    background: #000;
-    filter: brightness(0.6) contrast(1.1) saturate(0.3);
-}
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+            background: #000;
+        }
         
         #map::before {
             content: '';
@@ -603,20 +602,6 @@
     
     <!-- Map Container -->
     <div id="map"></div>
-   <!-- Dark Overlay for Noir Effect -->
-<div style="
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(to bottom, 
-        rgba(0, 0, 0, 0.3) 0%, 
-        rgba(0, 0, 0, 0.5) 100%);
-    pointer-events: none;
-    z-index: 1;
-    mix-blend-mode: darken;
-"></div>
     
     <!-- Particle Effects -->
     <div id="particles"></div>
@@ -761,19 +746,13 @@
             });
             
             map.on('load', async () => {
-                // Make map much darker - noir style
-const layers = map.getStyle().layers;
-layers.forEach(layer => {
-    if (layer.type === 'raster') {
-        map.setPaintProperty(layer.id, 'raster-opacity', 0.15);
-    }
-    if (layer.type === 'symbol') {
-        map.setPaintProperty(layer.id, 'text-color', '#444444');
-    }
-    if (layer.type === 'line') {
-        map.setPaintProperty(layer.id, 'line-opacity', 0.2);
-    }
-});
+                // Adjust map style opacity
+                const layers = map.getStyle().layers;
+                layers.forEach(layer => {
+                    if (layer.type === 'raster') {
+                        map.setPaintProperty(layer.id, 'raster-opacity', 0.8);
+                    }
+                });
                 
                 // Add 3D buildings if not already in style
                 if (!map.getLayer('3d-buildings')) {
@@ -1299,29 +1278,42 @@ layers.forEach(layer => {
                 simulateMovement();
             }
         }
+        
         function simulateMovement() {
-    // Nu mai simula - folosește GPS real
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                updatePosition(position);
-            },
-            (error) => {
-                console.error('GPS Error:', error);
-                // Fallback București dacă GPS nu merge
+            let lat = 44.4808;
+            let lng = 26.1246;
+            let angle = 0;
+            
+            updatePosition({
+                coords: {
+                    latitude: lat,
+                    longitude: lng,
+                    speed: 0,
+                    heading: 0,
+                    altitude: 121.6
+                }
+            });
+            
+            setInterval(() => {
+                angle += 0.1;
+                const radius = 0.0003;
+                lat = 44.4808 + Math.sin(angle) * radius;
+                lng = 26.1246 + Math.cos(angle) * radius;
+                
                 updatePosition({
                     coords: {
-                        latitude: 44.4808,
-                        longitude: 26.1246,
-                        speed: 0,
-                        heading: 0,
-                        altitude: 121.6
+                        latitude: lat,
+                        longitude: lng,
+                        speed: Math.random() * 2,
+                        heading: (angle * 180 / Math.PI) % 360,
+                        altitude: 121.6 + Math.sin(angle * 2) * 5
                     }
                 });
-            }
-        );
-    }
-}
+            }, 3000);
+        }
+        
+        async function updatePosition(position) {
+            const { latitude, longitude, speed, heading, altitude } = position.coords;
             
             // Create or update user marker
             if (!userMarker) {
