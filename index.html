@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Constellation Walker</title>
+    
+    <!-- Mapbox CSS -->
+    <link href='https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css' rel='stylesheet' />
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        :root {
+            --glow-primary: #00D4FF;
+            --glow-secondary: #FF00EA;
+            --glow-accent: #FFD700;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+        
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Map Container with Ambient Glow */
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+            background: #000;
+        }
+        
+        #map::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, 
+                transparent 30%,
+                rgba(0, 212, 255, 0.02) 50%,
+                rgba(255, 0, 234, 0.02) 70%,
+                transparent 100%);
+            animation: ambientRotate 60s linear infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        @keyframes ambientRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .mapboxgl-ctrl-logo,
+        .mapboxgl-ctrl-attrib,
+        .mapboxgl-ctrl-top-right {
+            display: none !important;
+        }
+        
+        /* Advanced Star Markers */
+        .star-marker {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            position: relative;
+            z-index: 100;
+            background: radial-gradient(circle at 30% 30%, 
+                currentColor, 
+                transparent 70%);
+            filter: blur(0.5px);
+            animation: starPulse 3s ease-in-out infinite;
+        }
+        
+        .star-marker::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center,
+                currentColor 0%,
+                transparent 40%);
+            opacity: 0.6;
+            animation: starGlow 2s ease-in-out infinite alternate;
+        }
+        
+        .star-marker::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300%;
+            height: 300%;
+            background: radial-gradient(circle at center,
+                currentColor 0%,
+                transparent 50%);
+            opacity: 0.3;
+            animation: starPulse 3s ease-in-out infinite;
+            animation-delay: -1.5s;
+        }
+        
+        .star-marker.mine {
+            width: 32px;
+            height: 32px;
+            z-index: 200;
+            filter: blur(0px);
+        }
+        
+        .star-marker.mine::before {
+            width: 250%;
+            height: 250%;
+            animation: myStarGlow 1.5s ease-in-out infinite alternate;
+        }
+        
+        @keyframes starPulse {
+            0%, 100% { 
+                transform: scale(1);
+                filter: brightness(1) blur(0.5px);
+            }
+            50% { 
+                transform: scale(1.15);
+                filter: brightness(1.5) blur(0.3px);
+            }
+        }
+        
+        @keyframes starGlow {
+            0% { 
+                opacity: 0.4;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            100% { 
+                opacity: 0.8;
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+        }
+        
+        @keyframes myStarGlow {
+            0% { 
+                opacity: 0.5;
+                transform: translate(-50%, -50%) scale(1);
+                filter: blur(3px);
+            }
+            100% { 
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.3);
+                filter: blur(5px);
+            }
+        }
+        
+        /* Holographic Echo Markers */
+        .echo-marker {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid;
+            position: relative;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            background: linear-gradient(135deg, 
+                rgba(0, 0, 0, 0.3),
+                rgba(255, 255, 255, 0.05));
+            backdrop-filter: blur(10px) saturate(200%);
+            -webkit-backdrop-filter: blur(10px) saturate(200%);
+            z-index: 50;
+            animation: echoFloat 4s ease-in-out infinite;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+        }
+        
+        .echo-marker::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, 
+                currentColor,
+                transparent,
+                currentColor);
+            border-radius: 50%;
+            opacity: 0.5;
+            animation: echoRing 3s linear infinite;
+            z-index: -1;
+        }
+        
+        .echo-marker::after {
+            content: '';
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            border: 1px solid currentColor;
+            border-radius: 50%;
+            opacity: 0;
+            animation: echoPing 2s ease-out infinite;
+        }
+        
+        .echo-marker:hover {
+            transform: translateY(-5px) scale(1.1);
+            filter: brightness(1.3);
+            box-shadow: 0 10px 40px currentColor;
+        }
+        
+        @keyframes echoFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        @keyframes echoRing {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes echoPing {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+        
+        /* Glassmorphic Top UI */
+        .top-info {
+            position: absolute;
+            top: env(safe-area-inset-top, 20px);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            pointer-events: none;
+        }
+        
+        .user-count {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.05),
+                rgba(255, 255, 255, 0.02));
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            padding: 14px 28px;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                0 0 80px rgba(0, 212, 255, 0.1);
+            letter-spacing: 0.5px;
+            animation: glassShimmer 3s ease-in-out infinite;
+        }
+        
+        @keyframes glassShimmer {
+            0%, 100% {
+                box-shadow: 
+                    0 8px 32px rgba(0, 0, 0, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                    0 0 80px rgba(0, 212, 255, 0.1);
+            }
+            50% {
+                box-shadow: 
+                    0 8px 32px rgba(0, 0, 0, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                    0 0 100px rgba(255, 0, 234, 0.15);
+            }
+        }
+        
+        /* Neon Echo Button */
+        .echo-button {
+            position: absolute;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 40px);
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            z-index: 1000;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            color: white;
+            border: none;
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            font-size: 32px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 
+                0 10px 40px rgba(102, 126, 234, 0.4),
+                0 0 0 0 rgba(102, 126, 234, 0.4),
+                inset 0 2px 10px rgba(255, 255, 255, 0.3);
+            opacity: 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .echo-button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent);
+            transform: rotate(45deg);
+            animation: buttonShine 3s ease-in-out infinite;
+        }
+        
+        .echo-button.visible {
+            transform: translateX(-50%) scale(1);
+            opacity: 1;
+            animation: buttonPulse 2s ease-in-out infinite;
+        }
+        
+        .echo-button:active {
+            transform: translateX(-50%) scale(0.95);
+        }
+        
+        @keyframes buttonPulse {
+            0%, 100% {
+                box-shadow: 
+                    0 10px 40px rgba(102, 126, 234, 0.4),
+                    0 0 0 0 rgba(102, 126, 234, 0.4),
+                    inset 0 2px 10px rgba(255, 255, 255, 0.3);
+            }
+            50% {
+                box-shadow: 
+                    0 10px 40px rgba(102, 126, 234, 0.6),
+                    0 0 0 15px rgba(102, 126, 234, 0.1),
+                    inset 0 2px 10px rgba(255, 255, 255, 0.4);
+            }
+        }
+        
+        @keyframes buttonShine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+        
+        /* Floating Echo Menu */
+        .echo-menu {
+            position: absolute;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 140px);
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            z-index: 999;
+            display: flex;
+            gap: 18px;
+            background: linear-gradient(135deg,
+                rgba(0, 0, 0, 0.7),
+                rgba(30, 30, 30, 0.5));
+            backdrop-filter: blur(30px) saturate(200%);
+            -webkit-backdrop-filter: blur(30px) saturate(200%);
+            padding: 22px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .echo-menu.visible {
+            transform: translateX(-50%) scale(1);
+            opacity: 1;
+        }
+        
+        .echo-option {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg,
+                rgba(255, 255, 255, 0.08),
+                rgba(255, 255, 255, 0.02));
+            color: white;
+            font-size: 26px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .echo-option::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle,
+                rgba(102, 126, 234, 0.4),
+                transparent 70%);
+            transition: all 0.4s ease;
+            transform: translate(-50%, -50%);
+        }
+        
+        .echo-option:hover {
+            transform: scale(1.15) translateY(-8px);
+            border-color: var(--glow-primary);
+            background: linear-gradient(135deg,
+                rgba(0, 212, 255, 0.2),
+                rgba(255, 0, 234, 0.1));
+            box-shadow: 
+                0 15px 30px rgba(0, 212, 255, 0.3),
+                inset 0 0 20px rgba(0, 212, 255, 0.1);
+        }
+        
+        .echo-option:hover::before {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Cinematic Loading Screen */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, 
+                #0a0a0f 0%, 
+                #000 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease-out;
+        }
+        
+        .loading-star {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%,
+                var(--glow-primary),
+                transparent 70%);
+            box-shadow: 
+                0 0 100px var(--glow-primary),
+                0 0 200px var(--glow-secondary);
+            animation: loadingPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes loadingPulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+        
+        .loading-text {
+            margin-top: 40px;
+            font-size: 16px;
+            font-weight: 300;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            background: linear-gradient(90deg,
+                var(--glow-primary),
+                var(--glow-secondary),
+                var(--glow-accent));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: textShimmer 3s ease-in-out infinite;
+        }
+        
+        @keyframes textShimmer {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        
+        /* Enhanced Status Indicator */
+        .status {
+            position: absolute;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 15px);
+            right: 15px;
+            background: linear-gradient(135deg,
+                rgba(0, 0, 0, 0.8),
+                rgba(20, 20, 20, 0.6));
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: statusPulse 2s ease-in-out infinite;
+        }
+        
+        .status.connected .status-dot { 
+            background: #00ff88;
+            box-shadow: 
+                0 0 10px #00ff88,
+                0 0 20px #00ff88;
+        }
+        
+        .status.disconnected .status-dot { 
+            background: #ff3366;
+            box-shadow: 
+                0 0 10px #ff3366,
+                0 0 20px #ff3366;
+        }
+        
+        @keyframes statusPulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.3);
+                opacity: 1;
+            }
+        }
+        
+        /* Particle Effects Container */
+        #particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: drift 20s linear infinite;
+            opacity: 0;
+        }
+        
+        @keyframes drift {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.4;
+            }
+            90% {
+                opacity: 0.4;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading" class="loading">
+        <div class="loading-star"></div>
+        <div class="loading-text">Entering Constellation</div>
+    </div>
+    
+    <!-- Map Container -->
+    <div id="map"></div>
+    
+    <!-- Particle Effects -->
+    <div id="particles"></div>
+    
+    <!-- Top Info -->
+    <div class="top-info">
+        <div class="user-count">
+            <span id="activeUsers">0</span> stars nearby ✨
+        </div>
+    </div>
+    
+    <!-- Echo Button -->
+    <button id="echoButton" class="echo-button">✨</button>
+    
+    <!-- Echo Menu -->
+    <div id="echoMenu" class="echo-menu">
+        <div class="echo-option" data-type="audio">🎤</div>
+        <div class="echo-option" data-type="photo">📷</div>
+        <div class="echo-option" data-type="video">🎥</div>
+        <div class="echo-option" data-type="mood">💭</div>
+        <div class="echo-option" data-type="text">💬</div>
+    </div>
+    
+    <!-- Connection Status -->
+    <div id="status" class="status disconnected">
+        <span class="status-dot"></span>
+        <span>Connecting...</span>
+    </div>
+    
+    <!-- Mapbox GL JS -->
+    <script src='https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js'></script>
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // ============================================
+        // CONFIGURAȚIE SUPABASE + MAPBOX
+        // ============================================
+        const SUPABASE_URL = 'https://wajgxfgeumpztjyafyem.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indhamd4ZmdldW1wenRqeWFmeWVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzU0MDcxMDYsImV4cCI6MjA1MDk4MzEwNn0.qGu5u8ZqeEXYHwAYA4iARW0L0BB8XtwwZpxIKMp6Afc';
+        const MAPBOX_TOKEN = 'pk.eyJ1IjoidmxhZHN0YXIiLCJhIjoiY21lcXVrZWRkMDR2MDJrczczYTFvYTBvMiJ9.H36WPQ21h1CTjbEb32AT1g';
+        const MAPBOX_STYLE = 'mapbox://styles/vladstar/cmetspgr7003g01sc2aeub7yg';
+        
+        // Inițializare Supabase
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // Variabile globale
+        let map;
+        let userMarker;
+        let userId;
+        let userColor;
+        let lastPosition = null;
+        let stationaryTimer = null;
+        let otherUsersMarkers = new Map();
+        let echoMarkers = new Map();
+        let positionSubscription = null;
+        let echoSubscription = null;
+        
+        // ============================================
+        // PARTICLE EFFECTS
+        // ============================================
+        
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                container.appendChild(particle);
+            }
+        }
+        
+        // ============================================
+        // FUNCȚII UTILITATE
+        // ============================================
+        
+        function getOrCreateUserId() {
+            let id = localStorage.getItem('constellation-user-id');
+            if (!id) {
+                id = crypto.randomUUID();
+                localStorage.setItem('constellation-user-id', id);
+            }
+            return id;
+        }
+        
+        function generateStarColor() {
+            const colors = [
+                '#00D4FF', // Cyan
+                '#FF00EA', // Magenta
+                '#FFD700', // Gold
+                '#00FF88', // Mint
+                '#FF6B6B', // Coral
+                '#A78BFA', // Purple
+                '#60A5FA', // Sky
+                '#F472B6'  // Pink
+            ];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+        
+        async function ensureUserExists() {
+            userColor = generateStarColor();
+            
+            const { data: existingUser } = await supabaseClient
+                .from('users')
+                .select('*')
+                .eq('id', userId)
+                .single();
+            
+            if (!existingUser) {
+                await supabaseClient
+                    .from('users')
+                    .insert({
+                        id: userId,
+                        color_hash: userColor
+                    });
+            } else {
+                userColor = existingUser.color_hash;
+            }
+        }
+        
+        // ============================================
+        // MAPBOX SETUP - ARTISTIC EDITION
+        // ============================================
+        
+        function initMap() {
+            mapboxgl.accessToken = MAPBOX_TOKEN;
+            
+            map = new mapboxgl.Map({
+                container: 'map',
+                style: MAPBOX_STYLE,
+                center: [26.1246, 44.4808],
+                zoom: 15,
+                pitch: 45,
+                bearing: -17.6,
+                antialias: true,
+                fadeDuration: 300
+            });
+            
+            map.on('load', async () => {
+                // Adjust map style opacity
+                const layers = map.getStyle().layers;
+                layers.forEach(layer => {
+                    if (layer.type === 'raster') {
+                        map.setPaintProperty(layer.id, 'raster-opacity', 0.8);
+                    }
+                });
+                
+                // Add 3D buildings if not already in style
+                if (!map.getLayer('3d-buildings')) {
+                    map.addLayer({
+                        'id': '3d-buildings',
+                        'source': 'composite',
+                        'source-layer': 'building',
+                        'filter': ['==', 'extrude', 'true'],
+                        'type': 'fill-extrusion',
+                        'minzoom': 15,
+                        'paint': {
+                            'fill-extrusion-color': [
+                                'interpolate',
+                                ['linear'],
+                                ['get', 'height'],
+                                0, 'rgba(20, 20, 30, 0.8)',
+                                200, 'rgba(40, 40, 60, 0.8)'
+                            ],
+                            'fill-extrusion-height': [
+                                'interpolate',
+                                ['linear'],
+                                ['zoom'],
+                                15, 0,
+                                15.05, ['get', 'height']
+                            ],
+                            'fill-extrusion-base': [
+                                'interpolate',
+                                ['linear'],
+                                ['zoom'],
+                                15, 0,
+                                15.05, ['get', 'min_height']
+                            ],
+                            'fill-extrusion-opacity': 0.4
+                        }
+                    });
+                }
+                
+                // Add constellation lines layer
+                map.addSource('constellation-lines', {
+                    type: 'geojson',
+                    data: {
+                        type: 'FeatureCollection',
+                        features: []
+                    }
+                });
+                
+                map.addLayer({
+                    id: 'constellation-layer',
+                    type: 'line',
+                    source: 'constellation-lines',
+                    paint: {
+                        'line-color': [
+                            'interpolate',
+                            ['linear'],
+                            ['line-progress'],
+                            0, 'rgba(0, 212, 255, 0.6)',
+                            1, 'rgba(255, 0, 234, 0.6)'
+                        ],
+                        'line-width': [
+                            'interpolate',
+                            ['linear'],
+                            ['zoom'],
+                            12, 1,
+                            22, 3
+                        ],
+                        'line-blur': 2,
+                        'line-opacity': 0.6,
+                        'line-gradient': [
+                            'interpolate',
+                            ['linear'],
+                            ['line-progress'],
+                            0, 'rgba(0, 212, 255, 0.1)',
+                            0.5, 'rgba(255, 255, 255, 0.4)',
+                            1, 'rgba(255, 0, 234, 0.1)'
+                        ]
+                    },
+                    layout: {
+                        'line-cap': 'round',
+                        'line-join': 'round'
+                    }
+                });
+                
+                // Add glow effect layer for constellation lines
+                map.addLayer({
+                    id: 'constellation-glow',
+                    type: 'line',
+                    source: 'constellation-lines',
+                    paint: {
+                        'line-color': 'rgba(255, 255, 255, 0.2)',
+                        'line-width': 8,
+                        'line-blur': 8,
+                        'line-opacity': 0.3
+                    },
+                    layout: {
+                        'line-cap': 'round',
+                        'line-join': 'round'
+                    }
+                }, 'constellation-layer');
+                
+                // Smooth camera animation on load
+                setTimeout(() => {
+                    map.easeTo({
+                        pitch: 60,
+                        bearing: 0,
+                        duration: 2000,
+                        easing: (t) => t * (2 - t)
+                    });
+                }, 500);
+                
+                // Hide loading with fade effect
+                const loading = document.getElementById('loading');
+                loading.style.opacity = '0';
+                setTimeout(() => {
+                    loading.style.display = 'none';
+                }, 800);
+                
+                // Initialize particles
+                createParticles();
+                
+                // Ensure user exists
+                await ensureUserExists();
+                
+                // Start everything
+                startRealtimeSync();
+                startLocationTracking();
+                loadInitialData();
+                setupEventListeners();
+                setupMapInteractions();
+            });
+        }
+        
+        // ============================================
+        // MAP INTERACTIONS
+        // ============================================
+        
+        function setupMapInteractions() {
+            // Smooth rotation on drag
+            let isRotating = false;
+            
+            map.on('dragstart', () => {
+                isRotating = true;
+            });
+            
+            map.on('dragend', () => {
+                isRotating = false;
+            });
+            
+            // Auto-rotate when idle
+            let idleTimer;
+            let autoRotate = false;
+            
+            function startAutoRotate() {
+                if (!autoRotate && !isRotating) {
+                    autoRotate = true;
+                    rotateCamera();
+                }
+            }
+            
+            function rotateCamera() {
+                if (autoRotate && !isRotating) {
+                    map.rotateTo((map.getBearing() + 0.2) % 360, {
+                        duration: 0,
+                        easing: (t) => t
+                    });
+                    requestAnimationFrame(rotateCamera);
+                }
+            }
+            
+            function resetIdleTimer() {
+                autoRotate = false;
+                clearTimeout(idleTimer);
+                idleTimer = setTimeout(startAutoRotate, 30000); // Start rotating after 30s idle
+            }
+            
+            map.on('move', resetIdleTimer);
+            map.on('click', resetIdleTimer);
+            resetIdleTimer();
+        }
+        
+        // ============================================
+        // REALTIME SYNC CU SUPABASE
+        // ============================================
+        
+        function startRealtimeSync() {
+            // Subscribe la schimbări în active_positions
+            positionSubscription = supabaseClient
+                .channel('positions')
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'active_positions'
+                }, (payload) => {
+                    handlePositionChange(payload);
+                })
+                .subscribe((status) => {
+                    updateConnectionStatus(status === 'SUBSCRIBED');
+                });
+            
+            // Subscribe la schimbări în echoes
+            echoSubscription = supabaseClient
+                .channel('echoes')
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'echoes'
+                }, (payload) => {
+                    handleEchoChange(payload);
+                })
+                .subscribe();
+        }
+        
+        function handlePositionChange(payload) {
+            const { eventType, new: newRecord, old: oldRecord } = payload;
+            
+            if (eventType === 'DELETE') {
+                removeUserMarker(oldRecord.user_id);
+            } else if (eventType === 'INSERT' || eventType === 'UPDATE') {
+                if (newRecord.user_id !== userId) {
+                    updateOtherUserMarker(newRecord.user_id, newRecord);
+                }
+            }
+            
+            updateUserCount();
+            updateConstellations();
+        }
+        
+        function handleEchoChange(payload) {
+            const { eventType, new: newRecord, old: oldRecord } = payload;
+            
+            if (eventType === 'DELETE') {
+                removeEchoMarker(oldRecord.id);
+            } else if (eventType === 'INSERT') {
+                addEchoMarker(newRecord.id, newRecord);
+            }
+        }
+        
+        async function loadInitialData() {
+            // Load active positions
+            const { data: positions } = await supabaseClient
+                .from('active_positions')
+                .select('*');
+            
+            if (positions) {
+                positions.forEach(pos => {
+                    if (pos.user_id !== userId) {
+                        updateOtherUserMarker(pos.user_id, pos);
+                    }
+                });
+            }
+            
+            // Load echoes from last 24 hours
+            const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+            const { data: echoes } = await supabaseClient
+                .from('echoes')
+                .select('*')
+                .gte('created_at', oneDayAgo);
+            
+            if (echoes) {
+                echoes.forEach(echo => {
+                    addEchoMarker(echo.id, echo);
+                });
+            }
+            
+            updateUserCount();
+        }
+        
+        function updateConnectionStatus(connected) {
+            const status = document.getElementById('status');
+            if (connected) {
+                status.className = 'status connected';
+                status.innerHTML = '<span class="status-dot"></span><span>Connected</span>';
+            } else {
+                status.className = 'status disconnected';
+                status.innerHTML = '<span class="status-dot"></span><span>Offline</span>';
+            }
+        }
+        
+        function updateUserCount() {
+            const count = otherUsersMarkers.size + 1;
+            document.getElementById('activeUsers').textContent = count;
+        }
+        
+        // ============================================
+        // USER MARKERS - ENHANCED
+        // ============================================
+        
+        function updateOtherUserMarker(id, data) {
+            if (!data.lat || !data.lng) return;
+            
+            // Get user color from users table
+            supabaseClient
+                .from('users')
+                .select('color_hash')
+                .eq('id', id)
+                .single()
+                .then(({ data: userData }) => {
+                    const color = userData?.color_hash || generateStarColor();
+                    
+                    if (otherUsersMarkers.has(id)) {
+                        // Smooth animation for existing marker
+                        const marker = otherUsersMarkers.get(id).marker;
+                        const currentPos = marker.getLngLat();
+                        const newPos = [data.lng, data.lat];
+                        
+                        // Animate movement
+                        animateMarkerMovement(marker, currentPos, newPos);
+                        otherUsersMarkers.get(id).position = newPos;
+                    } else {
+                        // Create new marker with entrance animation
+                        const el = document.createElement('div');
+                        el.className = 'star-marker';
+                        el.style.color = color;
+                        el.style.opacity = '0';
+                        el.style.transform = 'scale(0)';
+                        
+                        const marker = new mapboxgl.Marker(el)
+                            .setLngLat([data.lng, data.lat])
+                            .addTo(map);
+                        
+                        // Entrance animation
+                        setTimeout(() => {
+                            el.style.transition = 'all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                            el.style.opacity = '1';
+                            el.style.transform = 'scale(1)';
+                        }, 100);
+                        
+                        otherUsersMarkers.set(id, {
+                            marker: marker,
+                            position: [data.lng, data.lat],
+                            color: color
+                        });
+                    }
+                });
+        }
+        
+        function animateMarkerMovement(marker, from, to, duration = 1000) {
+            const start = performance.now();
+            
+            function frame(time) {
+                const elapsed = time - start;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Easing function
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+                
+                const lat = from.lat + (to[1] - from.lat) * easeProgress;
+                const lng = from.lng + (to[0] - from.lng) * easeProgress;
+                
+                marker.setLngLat([lng, lat]);
+                
+                if (progress < 1) {
+                    requestAnimationFrame(frame);
+                }
+            }
+            
+            requestAnimationFrame(frame);
+        }
+        
+        function removeUserMarker(id) {
+            if (otherUsersMarkers.has(id)) {
+                const { marker } = otherUsersMarkers.get(id);
+                const el = marker.getElement();
+                
+                // Exit animation
+                el.style.transition = 'all 0.6s ease-out';
+                el.style.opacity = '0';
+                el.style.transform = 'scale(0)';
+                
+                setTimeout(() => {
+                    marker.remove();
+                    otherUsersMarkers.delete(id);
+                    updateUserCount();
+                }, 600);
+            }
+        }
+        
+        // ============================================
+        // ECHO MARKERS - ENHANCED
+        // ============================================
+        
+        function addEchoMarker(id, data) {
+            if (!data.lat || !data.lng) return;
+            
+            const echoTypes = {
+                'audio': '🎤',
+                'photo': '📷',
+                'video': '🎥',
+                'mood': '💭',
+                'text': '💬'
+            };
+            
+            const el = document.createElement('div');
+            el.className = 'echo-marker';
+            el.style.color = data.mood_color || '#667eea';
+            el.style.borderColor = data.mood_color || '#667eea';
+            el.innerHTML = echoTypes[data.content_type] || '✨';
+            el.style.opacity = '0';
+            el.style.transform = 'scale(0)';
+            
+            const marker = new mapboxgl.Marker(el)
+                .setLngLat([data.lng, data.lat])
+                .addTo(map);
+            
+            // Entrance animation
+            setTimeout(() => {
+                el.style.transition = 'all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                el.style.opacity = '1';
+                el.style.transform = 'scale(1)';
+            }, 100);
+            
+            el.addEventListener('click', () => {
+                // Create ripple effect
+                createRippleEffect(el, data.mood_color);
+                
+                // Show echo details
+                showEchoDetails(data);
+                
+                // Update interaction count
+                supabaseClient
+                    .from('echoes')
+                    .update({ interaction_count: (data.interaction_count || 0) + 1 })
+                    .eq('id', id);
+            });
+            
+            echoMarkers.set(id, marker);
+        }
+        
+        function createRippleEffect(element, color) {
+            const ripple = document.createElement('div');
+            ripple.style.position = 'absolute';
+            ripple.style.width = '100%';
+            ripple.style.height = '100%';
+            ripple.style.borderRadius = '50%';
+            ripple.style.border = `2px solid ${color}`;
+            ripple.style.pointerEvents = 'none';
+            ripple.style.animation = 'echoPing 1s ease-out';
+            element.appendChild(ripple);
+            
+            setTimeout(() => ripple.remove(), 1000);
+        }
+        
+        function showEchoDetails(data) {
+            // Create custom popup
+            const popup = document.createElement('div');
+            popup.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) scale(0);
+                background: linear-gradient(135deg, rgba(0,0,0,0.9), rgba(30,30,30,0.8));
+                backdrop-filter: blur(20px);
+                padding: 30px;
+                border-radius: 20px;
+                border: 1px solid rgba(255,255,255,0.2);
+                color: white;
+                z-index: 10000;
+                text-align: center;
+                transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            `;
+            
+            popup.innerHTML = `
+                <div style="font-size: 48px; margin-bottom: 15px;">${data.content_type === 'audio' ? '🎤' : 
+                    data.content_type === 'photo' ? '📷' : 
+                    data.content_type === 'video' ? '🎥' : 
+                    data.content_type === 'mood' ? '💭' : '💬'}</div>
+                <div style="font-size: 18px; font-weight: 600; margin-bottom: 10px;">Echo Discovered!</div>
+                <div style="font-size: 14px; opacity: 0.8;">Type: ${data.content_type}</div>
+                <div style="font-size: 12px; opacity: 0.6; margin-top: 10px;">Tap outside to close</div>
+            `;
+            
+            document.body.appendChild(popup);
+            
+            setTimeout(() => {
+                popup.style.transform = 'translate(-50%, -50%) scale(1)';
+            }, 10);
+            
+            const closePopup = (e) => {
+                if (e.target !== popup && !popup.contains(e.target)) {
+                    popup.style.transform = 'translate(-50%, -50%) scale(0)';
+                    setTimeout(() => popup.remove(), 300);
+                    document.removeEventListener('click', closePopup);
+                }
+            };
+            
+            setTimeout(() => {
+                document.addEventListener('click', closePopup);
+            }, 100);
+        }
+        
+        function removeEchoMarker(id) {
+            if (echoMarkers.has(id)) {
+                const marker = echoMarkers.get(id);
+                const el = marker.getElement();
+                
+                el.style.transition = 'all 0.6s ease-out';
+                el.style.opacity = '0';
+                el.style.transform = 'scale(0) rotate(180deg)';
+                
+                setTimeout(() => {
+                    marker.remove();
+                    echoMarkers.delete(id);
+                }, 600);
+            }
+        }
+        
+        // ============================================
+        // LOCATION TRACKING - ENHANCED
+        // ============================================
+        
+        function startLocationTracking() {
+            if (navigator.geolocation) {
+                navigator.geolocation.watchPosition(
+                    updatePosition,
+                    handleLocationError,
+                    { 
+                        enableHighAccuracy: true, 
+                        maximumAge: 3000, 
+                        timeout: 5000 
+                    }
+                );
+            } else {
+                simulateMovement();
+            }
+        }
+        
+        function simulateMovement() {
+            let lat = 44.4808;
+            let lng = 26.1246;
+            let angle = 0;
+            
+            updatePosition({
+                coords: {
+                    latitude: lat,
+                    longitude: lng,
+                    speed: 0,
+                    heading: 0,
+                    altitude: 121.6
+                }
+            });
+            
+            setInterval(() => {
+                angle += 0.1;
+                const radius = 0.0003;
+                lat = 44.4808 + Math.sin(angle) * radius;
+                lng = 26.1246 + Math.cos(angle) * radius;
+                
+                updatePosition({
+                    coords: {
+                        latitude: lat,
+                        longitude: lng,
+                        speed: Math.random() * 2,
+                        heading: (angle * 180 / Math.PI) % 360,
+                        altitude: 121.6 + Math.sin(angle * 2) * 5
+                    }
+                });
+            }, 3000);
+        }
+        
+        async function updatePosition(position) {
+            const { latitude, longitude, speed, heading, altitude } = position.coords;
+            
+            // Create or update user marker
+            if (!userMarker) {
+                const el = document.createElement('div');
+                el.className = 'star-marker mine';
+                el.style.color = userColor;
+                
+                userMarker = new mapboxgl.Marker(el)
+                    .setLngLat([longitude, latitude])
+                    .addTo(map);
+                
+                map.flyTo({
+                    center: [longitude, latitude],
+                    zoom: 16,
+                    pitch: 60,
+                    bearing: heading || 0,
+                    duration: 2000,
+                    essential: true
+                });
+            } else {
+                userMarker.setLngLat([longitude, latitude]);
+                
+                // Smooth camera follow
+                if (Math.random() > 0.7) { // Don't update camera every time
+                    map.easeTo({
+                        center: [longitude, latitude],
+                        bearing: heading || map.getBearing(),
+                        duration: 1500
+                    });
+                }
+            }
+            
+            // Check if stationary for echo
+            if (speed < 0.5) {
+                if (!stationaryTimer) {
+                    stationaryTimer = setTimeout(() => {
+                        document.getElementById('echoButton').classList.add('visible');
+                        createPulseEffect();
+                    }, 5000);
+                }
+            } else {
+                clearTimeout(stationaryTimer);
+                stationaryTimer = null;
+                document.getElementById('echoButton').classList.remove('visible');
+                document.getElementById('echoMenu').classList.remove('visible');
+            }
+            
+            lastPosition = { lat: latitude, lng: longitude };
+            
+            // Update in Supabase
+            await supabaseClient
+                .from('active_positions')
+                .upsert({
+                    user_id: userId,
+                    lat: latitude,
+                    lng: longitude,
+                    altitude: altitude || 0,
+                    speed: speed || 0,
+                    heading: heading || 0,
+                    updated_at: new Date().toISOString()
+                });
+            
+            // Update last_seen
+            await supabaseClient
+                .from('users')
+                .update({ last_seen: new Date().toISOString() })
+                .eq('id', userId);
+            
+            updateConstellations();
+        }
+        
+        function createPulseEffect() {
+            const button = document.getElementById('echoButton');
+            button.style.animation = 'buttonPulse 2s ease-in-out infinite';
+        }
+        
+        function handleLocationError(error) {
+            console.error('Location error:', error);
+            simulateMovement();
+        }
+        
+        // ============================================
+        // CONSTELLATIONS - ENHANCED
+        // ============================================
+        
+        function updateConstellations() {
+            if (!lastPosition || !map.getSource('constellation-lines')) return;
+            
+            const features = [];
+            const nearbyUsers = Array.from(otherUsersMarkers.values())
+                .map(user => ({
+                    ...user,
+                    distance: calculateDistance(
+                        lastPosition.lat, lastPosition.lng,
+                        user.position[1], user.position[0]
+                    )
+                }))
+                .filter(user => user.distance < 1000)
+                .sort((a, b) => a.distance - b.distance)
+                .slice(0, 7);
+            
+            // Create constellation pattern
+            nearbyUsers.forEach((user, index) => {
+                // Direct line to user
+                features.push({
+                    type: 'Feature',
+                    properties: {
+                        distance: user.distance,
+                        index: index
+                    },
+                    geometry: {
+                        type: 'LineString',
+                        coordinates: [
+                            [lastPosition.lng, lastPosition.lat],
+                            user.position
+                        ]
+                    }
+                });
+                
+                // Connect nearby users to each other
+                nearbyUsers.slice(index + 1).forEach(otherUser => {
+                    const interUserDistance = calculateDistance(
+                        user.position[1], user.position[0],
+                        otherUser.position[1], otherUser.position[0]
+                    );
+                    
+                    if (interUserDistance < 500) {
+                        features.push({
+                            type: 'Feature',
+                            properties: {
+                                distance: interUserDistance,
+                                secondary: true
+                            },
+                            geometry: {
+                                type: 'LineString',
+                                coordinates: [user.position, otherUser.position]
+                            }
+                        });
+                    }
+                });
+            });
+            
+            map.getSource('constellation-lines').setData({
+                type: 'FeatureCollection',
+                features: features
+            });
+        }
+        
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371000;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+        
+        // ============================================
+        // EVENT LISTENERS - ENHANCED
+        // ============================================
+        
+        function setupEventListeners() {
+            // Echo button with haptic feedback simulation
+            const echoButton = document.getElementById('echoButton');
+            echoButton.addEventListener('click', () => {
+                // Visual feedback
+                echoButton.style.transform = 'translateX(-50%) scale(0.95)';
+                setTimeout(() => {
+                    echoButton.style.transform = 'translateX(-50%) scale(1)';
+                }, 100);
+                
+                // Toggle menu
+                const menu = document.getElementById('echoMenu');
+                menu.classList.toggle('visible');
+                
+                // Vibration API if available
+                if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                }
+            });
+            
+            // Echo options with enhanced interaction
+            document.querySelectorAll('.echo-option').forEach(option => {
+                option.addEventListener('click', (e) => {
+                    const type = e.currentTarget.dataset.type;
+                    
+                    // Visual feedback
+                    e.currentTarget.style.transform = 'scale(0.9)';
+                    setTimeout(() => {
+                        e.currentTarget.style.transform = 'scale(1)';
+                    }, 200);
+                    
+                    dropEcho(type);
+                    
+                    if (navigator.vibrate) {
+                        navigator.vibrate([50, 50, 50]);
+                    }
+                });
+            });
+            
+            // Cleanup on page unload
+            window.addEventListener('beforeunload', async () => {
+                if (userId) {
+                    await supabaseClient
+                        .from('active_positions')
+                        .delete()
+                        .eq('user_id', userId);
+                }
+            });
+            
+            // Handle visibility change
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    // Pause animations when hidden
+                    document.querySelectorAll('.star-marker').forEach(el => {
+                        el.style.animationPlayState = 'paused';
+                    });
+                } else {
+                    // Resume animations
+                    document.querySelectorAll('.star-marker').forEach(el => {
+                        el.style.animationPlayState = 'running';
+                    });
+                }
+            });
+        }
+        
+        // ============================================
+        // DROP ECHO - ENHANCED
+        // ============================================
+        
+        async function dropEcho(type) {
+            if (!lastPosition) return;
+            
+            const echoId = crypto.randomUUID();
+            const color = generateStarColor();
+            
+            // Create echo in database
+            await supabaseClient
+                .from('echoes')
+                .insert({
+                    id: echoId,
+                    user_id: userId,
+                    lat: lastPosition.lat,
+                    lng: lastPosition.lng,
+                    content_type: type,
+                    mood_color: color
+                });
+            
+            // Hide menu
+            document.getElementById('echoMenu').classList.remove('visible');
+            
+            // Create visual effect at location
+            createEchoDropEffect(lastPosition, color);
+        }
+        
+        function createEchoDropEffect(position, color) {
+            // Create expanding ring effect
+            const el = document.createElement('div');
+            el.style.cssText = `
+                width: 100px;
+                height: 100px;
+                border: 3px solid ${color};
+                border-radius: 50%;
+                pointer-events: none;
+                opacity: 1;
+                transform: scale(0);
+            `;
+            
+            const marker = new mapboxgl.Marker(el)
+                .setLngLat([position.lng, position.lat])
+                .addTo(map);
+            
+            // Animate
+            requestAnimationFrame(() => {
+                el.style.transition = 'all 1.5s ease-out';
+                el.style.transform = 'scale(3)';
+                el.style.opacity = '0';
+            });
+            
+            setTimeout(() => marker.remove(), 1500);
+            
+            // Create particle burst
+            for (let i = 0; i < 8; i++) {
+                const particle = document.createElement('div');
+                particle.style.cssText = `
+                    width: 4px;
+                    height: 4px;
+                    background: ${color};
+                    border-radius: 50%;
+                    pointer-events: none;
+                `;
+                
+                const angle = (i / 8) * Math.PI * 2;
+                const distance = 50 + Math.random() * 50;
+                
+                const pMarker = new mapboxgl.Marker(particle)
+                    .setLngLat([position.lng, position.lat])
+                    .addTo(map);
+                
+                setTimeout(() => {
+                    particle.style.transition = 'all 1s ease-out';
+                    particle.style.transform = `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px)`;
+                    particle.style.opacity = '0';
+                }, 10);
+                
+                setTimeout(() => pMarker.remove(), 1000);
+            }
+        }
+        
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        
+        userId = getOrCreateUserId();
+        initMap();
+    </script>
+</body>
+</html>
