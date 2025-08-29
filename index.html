@@ -1355,15 +1355,8 @@
             } else {
                 userMarker.setLngLat([longitude, latitude]);
                 
-                // Smooth camera follow
-                if (Math.random() > 0.7) { // Don't update camera every time
-                    map.easeTo({
-                        center: [longitude, latitude],
-                        bearing: heading || map.getBearing(),
-                        duration: 1500
-                    });
-                }
-            }
+               // Camera urmărește doar prima dată, apoi stă pe loc
+// (comentat pentru hartă stabilă)
             
             // Check if stationary for echo
             if (speed < 0.5) {
