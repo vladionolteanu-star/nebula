@@ -746,13 +746,19 @@
             });
             
             map.on('load', async () => {
-                // Adjust map style opacity
-                const layers = map.getStyle().layers;
-                layers.forEach(layer => {
-                    if (layer.type === 'raster') {
-                        map.setPaintProperty(layer.id, 'raster-opacity', 0.8);
-                    }
-                });
+                // Make map much darker - noir style
+const layers = map.getStyle().layers;
+layers.forEach(layer => {
+    if (layer.type === 'raster') {
+        map.setPaintProperty(layer.id, 'raster-opacity', 0.15);
+    }
+    if (layer.type === 'symbol') {
+        map.setPaintProperty(layer.id, 'text-color', '#444444');
+    }
+    if (layer.type === 'line') {
+        map.setPaintProperty(layer.id, 'line-opacity', 0.2);
+    }
+});
                 
                 // Add 3D buildings if not already in style
                 if (!map.getLayer('3d-buildings')) {
