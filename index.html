@@ -1279,7 +1279,7 @@
             }
         }
         
-function simulateMovement() {
+       function simulateMovement() {
     // Nu mai simula - folosește GPS real
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -1301,27 +1301,7 @@ function simulateMovement() {
             }
         );
     }
-}     
-            setInterval(() => {
-                angle += 0.1;
-                const radius = 0.0003;
-                lat = 44.4808 + Math.sin(angle) * radius;
-                lng = 26.1246 + Math.cos(angle) * radius;
-                
-                updatePosition({
-                    coords: {
-                        latitude: lat,
-                        longitude: lng,
-                        speed: Math.random() * 2,
-                        heading: (angle * 180 / Math.PI) % 360,
-                        altitude: 121.6 + Math.sin(angle * 2) * 5
-                    }
-                });
-            }, 3000);
-        }
-        
-        async function updatePosition(position) {
-            const { latitude, longitude, speed, heading, altitude } = position.coords;
+}
             
             // Create or update user marker
             if (!userMarker) {
