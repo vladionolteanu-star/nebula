@@ -888,59 +888,25 @@
         // MAP INTERACTIONS
         // ============================================
         
-       function setupMapInteractions() {
-    // Smooth rotation on drag
-    let isRotating = false;
-    
-    map.on('dragstart', () => {
-        isRotating = true;
-    });
-    
-    map.on('dragend', () => {
-        isRotating = false;
-    });
-    
-    // Auto-rotate when idle - DEZACTIVAT
-    // Nu mai pornim auto-rotate deloc
-}
-    
-    // COMENTAT - fără auto-rotate
-    /*
-    let idleTimer;
-    let autoRotate = false;
-    
-    function startAutoRotate() {
-        if (!autoRotate && !isRotating) {
-            autoRotate = true;
-            rotateCamera();
-        }
-    }
-    
-    function rotateCamera() {
-        if (autoRotate && !isRotating) {
-            map.rotateTo((map.getBearing() + 0.2) % 360, {
-                duration: 0,
-                easing: (t) => t
+        function setupMapInteractions() {
+            // Smooth rotation on drag
+            let isRotating = false;
+            
+            map.on('dragstart', () => {
+                isRotating = true;
             });
-            requestAnimationFrame(rotateCamera);
-        }
-    }
-    
-    function resetIdleTimer() {
-        autoRotate = false;
-        clearTimeout(idleTimer);
-        idleTimer = setTimeout(startAutoRotate, 30000);
-    }
-    
-    map.on('move', resetIdleTimer);
-    map.on('click', resetIdleTimer);
-    resetIdleTimer();
-    */
-}
+            
+            map.on('dragend', () => {
+                isRotating = false;
+            });
+            
+            // Auto-rotate when idle
+            let idleTimer;
+            let autoRotate = false;
             
             function startAutoRotate() {
                 if (!autoRotate && !isRotating) {
-                    autoRotate = false;
+                    autoRotate = true;
                     rotateCamera();
                 }
             }
@@ -961,10 +927,9 @@
                 idleTimer = setTimeout(startAutoRotate, 30000); // Start rotating after 30s idle
             }
             
-            // DEZACTIVAT - nu mai rotește automat
-// map.on('move', resetIdleTimer);
-// map.on('click', resetIdleTimer);
-// resetIdleTimer();
+            map.on('move', resetIdleTimer);
+            map.on('click', resetIdleTimer);
+            resetIdleTimer();
         }
         
         // ============================================
@@ -1299,31 +1264,21 @@
         // ============================================
         
         function startLocationTracking() {
-    if (navigator.geolocation) {
-        // Urmărește poziția real-time ca în Google Maps
-        navigator.geolocation.watchPosition(
-            updatePosition,
-            (error) => {
-                console.error('GPS Error:', error);
-                // Fallback doar dacă GPS nu merge deloc
-                updatePosition({
-                    coords: {
-                        latitude: 44.4808,
-                        longitude: 26.1246,
-                        speed: 0,
-                        heading: 0,
-                        altitude: 0
+            if (navigator.geolocation) {
+                navigator.geolocation.watchPosition(
+                    updatePosition,
+                    handleLocationError,
+                    { 
+                        enableHighAccuracy: true, 
+                        maximumAge: 3000, 
+                        timeout: 5000 
                     }
-                });
-            },
-            { 
-                enableHighAccuracy: true, 
-                maximumAge: 1000, 
-                timeout: 5000 
+                );
+            } else {
+                simulateMovement();
             }
-        );
-    }
-}
+        }
+        
         function simulateMovement() {
             let lat = 44.4808;
             let lng = 26.1246;
@@ -1362,16 +1317,8 @@
             
             // Create or update user marker
             if (!userMarker) {
-               const el = document.createElement('div');
-el.style.cssText = `
-    width: 50px !important;
-    height: 50px !important;
-    background: white !important;
-    border-radius: 50% !important;
-    box-shadow: 0 0 50px white, 0 0 100px white !important;
-    z-index: 99999 !important;
-    position: absolute !important;
-`;
+                const el = document.createElement('div');
+                el.className = 'star-marker mine';
                 el.style.color = userColor;
                 
                 userMarker = new mapboxgl.Marker(el)
