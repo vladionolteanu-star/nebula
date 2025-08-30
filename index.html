@@ -889,8 +889,49 @@
         // ============================================
         
         function setupMapInteractions() {
-    // DEZACTIVAT COMPLET - fără rotații automate
-    console.log('Map interactions disabled - no auto rotation');
+    // Dezactivăm doar auto-rotate, păstrăm interacțiunea manuală
+    let isRotating = false;
+    
+    map.on('dragstart', () => {
+        isRotating = true;
+    });
+    
+    map.on('dragend', () => {
+        isRotating = false;
+    });
+    
+    // COMENTAT - fără auto-rotate
+    /*
+    let idleTimer;
+    let autoRotate = false;
+    
+    function startAutoRotate() {
+        if (!autoRotate && !isRotating) {
+            autoRotate = true;
+            rotateCamera();
+        }
+    }
+    
+    function rotateCamera() {
+        if (autoRotate && !isRotating) {
+            map.rotateTo((map.getBearing() + 0.2) % 360, {
+                duration: 0,
+                easing: (t) => t
+            });
+            requestAnimationFrame(rotateCamera);
+        }
+    }
+    
+    function resetIdleTimer() {
+        autoRotate = false;
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(startAutoRotate, 30000);
+    }
+    
+    map.on('move', resetIdleTimer);
+    map.on('click', resetIdleTimer);
+    resetIdleTimer();
+    */
 }
             
             function startAutoRotate() {
