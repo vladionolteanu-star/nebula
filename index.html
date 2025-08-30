@@ -888,8 +888,8 @@
         // MAP INTERACTIONS
         // ============================================
         
-        function setupMapInteractions() {
-    // Dezactivăm doar auto-rotate, păstrăm interacțiunea manuală
+       function setupMapInteractions() {
+    // Smooth rotation on drag
     let isRotating = false;
     
     map.on('dragstart', () => {
@@ -899,6 +899,10 @@
     map.on('dragend', () => {
         isRotating = false;
     });
+    
+    // Auto-rotate when idle - DEZACTIVAT
+    // Nu mai pornim auto-rotate deloc
+}
     
     // COMENTAT - fără auto-rotate
     /*
