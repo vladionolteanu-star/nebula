@@ -1317,16 +1317,15 @@
             
             // Create or update user marker
             if (!userMarker) {
-                const el = document.createElement('div');
-               el.className = 'star-marker mine';
+               const el = document.createElement('div');
 el.style.cssText = `
-    width: 40px !important;
-    height: 40px !important;
-    background: radial-gradient(circle, #FFFFFF 40%, transparent 70%);
-    border: 3px solid #FFFFFF;
-    border-radius: 50%;
-    box-shadow: 0 0 40px #FFFFFF, 0 0 80px rgba(255,255,255,0.6);
-    z-index: 9999 !important;
+    width: 50px !important;
+    height: 50px !important;
+    background: white !important;
+    border-radius: 50% !important;
+    box-shadow: 0 0 50px white, 0 0 100px white !important;
+    z-index: 99999 !important;
+    position: absolute !important;
 `;
                 el.style.color = userColor;
                 
