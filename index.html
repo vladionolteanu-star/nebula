@@ -889,24 +889,13 @@
         // ============================================
         
         function setupMapInteractions() {
-            // Smooth rotation on drag
-            let isRotating = false;
-            
-            map.on('dragstart', () => {
-                isRotating = true;
-            });
-            
-            map.on('dragend', () => {
-                isRotating = false;
-            });
-            
-            // Auto-rotate when idle
-            let idleTimer;
-            let autoRotate = false;
+    // DEZACTIVAT COMPLET - fără rotații automate
+    console.log('Map interactions disabled - no auto rotation');
+}
             
             function startAutoRotate() {
                 if (!autoRotate && !isRotating) {
-                    autoRotate = true;
+                    autoRotate = false;
                     rotateCamera();
                 }
             }
