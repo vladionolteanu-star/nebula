@@ -1318,7 +1318,16 @@
             // Create or update user marker
             if (!userMarker) {
                 const el = document.createElement('div');
-                el.className = 'star-marker mine';
+               el.className = 'star-marker mine';
+el.style.cssText = `
+    width: 40px !important;
+    height: 40px !important;
+    background: radial-gradient(circle, #FFFFFF 40%, transparent 70%);
+    border: 3px solid #FFFFFF;
+    border-radius: 50%;
+    box-shadow: 0 0 40px #FFFFFF, 0 0 80px rgba(255,255,255,0.6);
+    z-index: 9999 !important;
+`;
                 el.style.color = userColor;
                 
                 userMarker = new mapboxgl.Marker(el)
