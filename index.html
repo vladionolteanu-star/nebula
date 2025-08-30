@@ -18,14 +18,14 @@
             -webkit-tap-highlight-color: transparent;
         }
         
-       :root {
-    --glow-primary: #FFFFFF;
-    --glow-secondary: #808080;
-    --glow-accent: #C0C0C0;
-    --glass-bg: rgba(0, 0, 0, 0.85);
-    --glass-border: rgba(255, 255, 255, 0.05);
-    --noir-shadow: 0 0 100px rgba(0, 0, 0, 0.9);
-}
+        :root {
+            --glow-primary: #FFFFFF;
+            --glow-secondary: #808080;
+            --glow-accent: #C0C0C0;
+            --glass-bg: rgba(0, 0, 0, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.05);
+            --noir-shadow: 0 0 100px rgba(0, 0, 0, 0.9);
+        }
         
         body {
             font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -37,7 +37,7 @@
             height: 100%;
         }
         
-        /* Map Container with Ambient Glow */
+        /* Map Container */
         #map {
             position: absolute;
             top: 0;
@@ -46,35 +46,28 @@
             background: #000;
         }
         
-        #map::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle at center, 
-                transparent 30%,
-                rgba(0, 212, 255, 0.02) 50%,
-                rgba(255, 0, 234, 0.02) 70%,
-                transparent 100%);
-            animation: ambientRotate 60s linear infinite;
-            pointer-events: none;
-            z-index: 1;
-        }
-        
-        @keyframes ambientRotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
         .mapboxgl-ctrl-logo,
         .mapboxgl-ctrl-attrib,
         .mapboxgl-ctrl-top-right {
             display: none !important;
         }
         
-        /* Advanced Star Markers */
+        /* GPS Debug Info - NEW */
+        .gps-debug {
+            position: absolute;
+            top: 60px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-family: monospace;
+            color: #0f0;
+            z-index: 2000;
+            max-width: 200px;
+        }
+        
+        /* My Star Marker - Enhanced visibility */
         .star-marker {
             width: 24px;
             height: 24px;
@@ -103,32 +96,18 @@
             animation: starGlow 2s ease-in-out infinite alternate;
         }
         
-        .star-marker::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 300%;
-            height: 300%;
-            background: radial-gradient(circle at center,
-                currentColor 0%,
-                transparent 50%);
-            opacity: 0.3;
-            animation: starPulse 3s ease-in-out infinite;
-            animation-delay: -1.5s;
-        }
-        
         .star-marker.mine {
-            width: 32px;
-            height: 32px;
-            z-index: 200;
+            width: 40px;
+            height: 40px;
+            z-index: 500;
             filter: blur(0px);
+            color: #00D4FF !important;
+            box-shadow: 0 0 30px currentColor;
         }
         
         .star-marker.mine::before {
-            width: 250%;
-            height: 250%;
+            width: 300%;
+            height: 300%;
             animation: myStarGlow 1.5s ease-in-out infinite alternate;
         }
         
@@ -167,7 +146,7 @@
             }
         }
         
-        /* Holographic Echo Markers */
+        /* Echo Markers */
         .echo-marker {
             width: 36px;
             height: 36px;
@@ -189,62 +168,12 @@
             transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
         }
         
-        .echo-marker::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, 
-                currentColor,
-                transparent,
-                currentColor);
-            border-radius: 50%;
-            opacity: 0.5;
-            animation: echoRing 3s linear infinite;
-            z-index: -1;
-        }
-        
-        .echo-marker::after {
-            content: '';
-            position: absolute;
-            width: 150%;
-            height: 150%;
-            border: 1px solid currentColor;
-            border-radius: 50%;
-            opacity: 0;
-            animation: echoPing 2s ease-out infinite;
-        }
-        
-        .echo-marker:hover {
-            transform: translateY(-5px) scale(1.1);
-            filter: brightness(1.3);
-            box-shadow: 0 10px 40px currentColor;
-        }
-        
         @keyframes echoFloat {
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-8px); }
         }
         
-        @keyframes echoRing {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        @keyframes echoPing {
-            0% {
-                transform: scale(1);
-                opacity: 0.8;
-            }
-            100% {
-                transform: scale(2);
-                opacity: 0;
-            }
-        }
-        
-        /* Glassmorphic Top UI */
+        /* Top UI */
         .top-info {
             position: absolute;
             top: env(safe-area-inset-top, 20px);
@@ -268,33 +197,16 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 
                 0 8px 32px rgba(0, 0, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2),
-                0 0 80px rgba(0, 212, 255, 0.1);
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
             letter-spacing: 0.5px;
-            animation: glassShimmer 3s ease-in-out infinite;
         }
         
-        @keyframes glassShimmer {
-            0%, 100% {
-                box-shadow: 
-                    0 8px 32px rgba(0, 0, 0, 0.3),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.2),
-                    0 0 80px rgba(0, 212, 255, 0.1);
-            }
-            50% {
-                box-shadow: 
-                    0 8px 32px rgba(0, 0, 0, 0.3),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-                    0 0 100px rgba(255, 0, 234, 0.15);
-            }
-        }
-        
-        /* Neon Echo Button */
+        /* Echo Button - ALWAYS VISIBLE */
         .echo-button {
             position: absolute;
             bottom: calc(env(safe-area-inset-bottom, 0px) + 40px);
             left: 50%;
-            transform: translateX(-50%) scale(0);
+            transform: translateX(-50%);
             z-index: 1000;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
             color: white;
@@ -307,31 +219,7 @@
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             box-shadow: 
                 0 10px 40px rgba(102, 126, 234, 0.4),
-                0 0 0 0 rgba(102, 126, 234, 0.4),
                 inset 0 2px 10px rgba(255, 255, 255, 0.3);
-            opacity: 0;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .echo-button::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg,
-                transparent,
-                rgba(255, 255, 255, 0.3),
-                transparent);
-            transform: rotate(45deg);
-            animation: buttonShine 3s ease-in-out infinite;
-        }
-        
-        .echo-button.visible {
-            transform: translateX(-50%) scale(1);
-            opacity: 1;
             animation: buttonPulse 2s ease-in-out infinite;
         }
         
@@ -354,12 +242,7 @@
             }
         }
         
-        @keyframes buttonShine {
-            0% { transform: translateX(-100%) rotate(45deg); }
-            100% { transform: translateX(100%) rotate(45deg); }
-        }
-        
-        /* Floating Echo Menu */
+        /* Echo Menu */
         .echo-menu {
             position: absolute;
             bottom: calc(env(safe-area-inset-bottom, 0px) + 140px);
@@ -407,20 +290,6 @@
             overflow: hidden;
         }
         
-        .echo-option::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: radial-gradient(circle,
-                rgba(102, 126, 234, 0.4),
-                transparent 70%);
-            transition: all 0.4s ease;
-            transform: translate(-50%, -50%);
-        }
-        
         .echo-option:hover {
             transform: scale(1.15) translateY(-8px);
             border-color: var(--glow-primary);
@@ -432,12 +301,7 @@
                 inset 0 0 20px rgba(0, 212, 255, 0.1);
         }
         
-        .echo-option:hover::before {
-            width: 100%;
-            height: 100%;
-        }
-        
-        /* Cinematic Loading Screen */
+        /* Loading Screen */
         .loading {
             position: fixed;
             top: 0;
@@ -500,7 +364,7 @@
             50% { opacity: 1; }
         }
         
-        /* Enhanced Status Indicator */
+        /* Status Indicator */
         .status {
             position: absolute;
             bottom: calc(env(safe-area-inset-bottom, 0px) + 15px);
@@ -553,44 +417,6 @@
                 opacity: 1;
             }
         }
-        
-        /* Particle Effects Container */
-        #particles {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            pointer-events: none;
-            z-index: 2;
-        }
-        
-        .particle {
-            position: absolute;
-            width: 2px;
-            height: 2px;
-            background: white;
-            border-radius: 50%;
-            animation: drift 20s linear infinite;
-            opacity: 0;
-        }
-        
-        @keyframes drift {
-            0% {
-                transform: translateY(100vh) translateX(0);
-                opacity: 0;
-            }
-            10% {
-                opacity: 0.4;
-            }
-            90% {
-                opacity: 0.4;
-            }
-            100% {
-                transform: translateY(-100vh) translateX(100px);
-                opacity: 0;
-            }
-        }
     </style>
 </head>
 <body>
@@ -603,8 +429,13 @@
     <!-- Map Container -->
     <div id="map"></div>
     
-    <!-- Particle Effects -->
-    <div id="particles"></div>
+    <!-- GPS Debug Info -->
+    <div id="gpsDebug" class="gps-debug">
+        GPS: Waiting...<br>
+        Lat: --<br>
+        Lng: --<br>
+        Accuracy: --
+    </div>
     
     <!-- Top Info -->
     <div class="top-info">
@@ -613,7 +444,7 @@
         </div>
     </div>
     
-    <!-- Echo Button -->
+    <!-- Echo Button - Always Visible -->
     <button id="echoButton" class="echo-button">✨</button>
     
     <!-- Echo Menu -->
@@ -655,28 +486,25 @@
         let userId;
         let userColor;
         let lastPosition = null;
-        let stationaryTimer = null;
         let otherUsersMarkers = new Map();
         let echoMarkers = new Map();
         let positionSubscription = null;
         let echoSubscription = null;
+        let watchId = null; // Pentru GPS watch
+        let hasInitialPosition = false; // Flag pentru prima poziție
         
         // ============================================
-        // PARTICLE EFFECTS
+        // DEBUG FUNCTIONS
         // ============================================
         
-        function createParticles() {
-            const container = document.getElementById('particles');
-            const particleCount = 30;
-            
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 20 + 's';
-                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
-                container.appendChild(particle);
-            }
+        function updateGPSDebug(message, lat = '--', lng = '--', accuracy = '--') {
+            const debug = document.getElementById('gpsDebug');
+            debug.innerHTML = `
+                GPS: ${message}<br>
+                Lat: ${typeof lat === 'number' ? lat.toFixed(6) : lat}<br>
+                Lng: ${typeof lng === 'number' ? lng.toFixed(6) : lng}<br>
+                Accuracy: ${typeof accuracy === 'number' ? Math.round(accuracy) + 'm' : accuracy}
+            `;
         }
         
         // ============================================
@@ -728,7 +556,7 @@
         }
         
         // ============================================
-        // MAPBOX SETUP - ARTISTIC EDITION
+        // MAPBOX SETUP - SIMPLIFIED (NO AUTO-ROTATE)
         // ============================================
         
         function initMap() {
@@ -737,58 +565,16 @@
             map = new mapboxgl.Map({
                 container: 'map',
                 style: MAPBOX_STYLE,
-                center: [26.1246, 44.4808],
-                zoom: 15,
-                pitch: 45,
-                bearing: -17.6,
+                center: [26.1246, 44.4808], // București default
+                zoom: 16,
+                pitch: 0, // Start flat
+                bearing: 0,
                 antialias: true,
                 fadeDuration: 300
             });
             
             map.on('load', async () => {
-                // Adjust map style opacity
-                const layers = map.getStyle().layers;
-                layers.forEach(layer => {
-                    if (layer.type === 'raster') {
-                        map.setPaintProperty(layer.id, 'raster-opacity', 0.8);
-                    }
-                });
-                
-                // Add 3D buildings if not already in style
-                if (!map.getLayer('3d-buildings')) {
-                    map.addLayer({
-                        'id': '3d-buildings',
-                        'source': 'composite',
-                        'source-layer': 'building',
-                        'filter': ['==', 'extrude', 'true'],
-                        'type': 'fill-extrusion',
-                        'minzoom': 15,
-                        'paint': {
-                            'fill-extrusion-color': [
-                                'interpolate',
-                                ['linear'],
-                                ['get', 'height'],
-                                0, 'rgba(20, 20, 30, 0.8)',
-                                200, 'rgba(40, 40, 60, 0.8)'
-                            ],
-                            'fill-extrusion-height': [
-                                'interpolate',
-                                ['linear'],
-                                ['zoom'],
-                                15, 0,
-                                15.05, ['get', 'height']
-                            ],
-                            'fill-extrusion-base': [
-                                'interpolate',
-                                ['linear'],
-                                ['zoom'],
-                                15, 0,
-                                15.05, ['get', 'min_height']
-                            ],
-                            'fill-extrusion-opacity': 0.4
-                        }
-                    });
-                }
+                console.log('Map loaded successfully');
                 
                 // Add constellation lines layer
                 map.addSource('constellation-lines', {
@@ -804,30 +590,9 @@
                     type: 'line',
                     source: 'constellation-lines',
                     paint: {
-                        'line-color': [
-                            'interpolate',
-                            ['linear'],
-                            ['line-progress'],
-                            0, 'rgba(0, 212, 255, 0.6)',
-                            1, 'rgba(255, 0, 234, 0.6)'
-                        ],
-                        'line-width': [
-                            'interpolate',
-                            ['linear'],
-                            ['zoom'],
-                            12, 1,
-                            22, 3
-                        ],
-                        'line-blur': 2,
-                        'line-opacity': 0.6,
-                        'line-gradient': [
-                            'interpolate',
-                            ['linear'],
-                            ['line-progress'],
-                            0, 'rgba(0, 212, 255, 0.1)',
-                            0.5, 'rgba(255, 255, 255, 0.4)',
-                            1, 'rgba(255, 0, 234, 0.1)'
-                        ]
+                        'line-color': '#00D4FF',
+                        'line-width': 2,
+                        'line-opacity': 0.6
                     },
                     layout: {
                         'line-cap': 'round',
@@ -835,42 +600,12 @@
                     }
                 });
                 
-                // Add glow effect layer for constellation lines
-                map.addLayer({
-                    id: 'constellation-glow',
-                    type: 'line',
-                    source: 'constellation-lines',
-                    paint: {
-                        'line-color': 'rgba(255, 255, 255, 0.2)',
-                        'line-width': 8,
-                        'line-blur': 8,
-                        'line-opacity': 0.3
-                    },
-                    layout: {
-                        'line-cap': 'round',
-                        'line-join': 'round'
-                    }
-                }, 'constellation-layer');
-                
-                // Smooth camera animation on load
-                setTimeout(() => {
-                    map.easeTo({
-                        pitch: 60,
-                        bearing: 0,
-                        duration: 2000,
-                        easing: (t) => t * (2 - t)
-                    });
-                }, 500);
-                
-                // Hide loading with fade effect
+                // Hide loading
                 const loading = document.getElementById('loading');
                 loading.style.opacity = '0';
                 setTimeout(() => {
                     loading.style.display = 'none';
                 }, 800);
-                
-                // Initialize particles
-                createParticles();
                 
                 // Ensure user exists
                 await ensureUserExists();
@@ -880,56 +615,9 @@
                 startLocationTracking();
                 loadInitialData();
                 setupEventListeners();
-                setupMapInteractions();
+                
+                console.log('All systems initialized');
             });
-        }
-        
-        // ============================================
-        // MAP INTERACTIONS
-        // ============================================
-        
-        function setupMapInteractions() {
-            // Smooth rotation on drag
-            let isRotating = false;
-            
-            map.on('dragstart', () => {
-                isRotating = true;
-            });
-            
-            map.on('dragend', () => {
-                isRotating = false;
-            });
-            
-            // Auto-rotate when idle
-            let idleTimer;
-            let autoRotate = false;
-            
-            function startAutoRotate() {
-                if (!autoRotate && !isRotating) {
-                    autoRotate = true;
-                    rotateCamera();
-                }
-            }
-            
-            function rotateCamera() {
-                if (autoRotate && !isRotating) {
-                    map.rotateTo((map.getBearing() + 0.2) % 360, {
-                        duration: 0,
-                        easing: (t) => t
-                    });
-                    requestAnimationFrame(rotateCamera);
-                }
-            }
-            
-            function resetIdleTimer() {
-                autoRotate = false;
-                clearTimeout(idleTimer);
-                idleTimer = setTimeout(startAutoRotate, 30000); // Start rotating after 30s idle
-            }
-            
-            map.on('move', resetIdleTimer);
-            map.on('click', resetIdleTimer);
-            resetIdleTimer();
         }
         
         // ============================================
@@ -937,6 +625,8 @@
         // ============================================
         
         function startRealtimeSync() {
+            console.log('Starting realtime sync...');
+            
             // Subscribe la schimbări în active_positions
             positionSubscription = supabaseClient
                 .channel('positions')
@@ -945,9 +635,11 @@
                     schema: 'public',
                     table: 'active_positions'
                 }, (payload) => {
+                    console.log('Position change:', payload);
                     handlePositionChange(payload);
                 })
                 .subscribe((status) => {
+                    console.log('Position subscription status:', status);
                     updateConnectionStatus(status === 'SUBSCRIBED');
                 });
             
@@ -959,6 +651,7 @@
                     schema: 'public',
                     table: 'echoes'
                 }, (payload) => {
+                    console.log('Echo change:', payload);
                     handleEchoChange(payload);
                 })
                 .subscribe();
@@ -990,12 +683,17 @@
         }
         
         async function loadInitialData() {
+            console.log('Loading initial data...');
+            
             // Load active positions
-            const { data: positions } = await supabaseClient
+            const { data: positions, error: posError } = await supabaseClient
                 .from('active_positions')
                 .select('*');
             
-            if (positions) {
+            if (posError) {
+                console.error('Error loading positions:', posError);
+            } else if (positions) {
+                console.log(`Found ${positions.length} active users`);
                 positions.forEach(pos => {
                     if (pos.user_id !== userId) {
                         updateOtherUserMarker(pos.user_id, pos);
@@ -1005,12 +703,15 @@
             
             // Load echoes from last 24 hours
             const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-            const { data: echoes } = await supabaseClient
+            const { data: echoes, error: echoError } = await supabaseClient
                 .from('echoes')
                 .select('*')
                 .gte('created_at', oneDayAgo);
             
-            if (echoes) {
+            if (echoError) {
+                console.error('Error loading echoes:', echoError);
+            } else if (echoes) {
+                console.log(`Found ${echoes.length} echoes`);
                 echoes.forEach(echo => {
                     addEchoMarker(echo.id, echo);
                 });
@@ -1036,7 +737,7 @@
         }
         
         // ============================================
-        // USER MARKERS - ENHANCED
+        // USER MARKERS
         // ============================================
         
         function updateOtherUserMarker(id, data) {
@@ -1052,85 +753,43 @@
                     const color = userData?.color_hash || generateStarColor();
                     
                     if (otherUsersMarkers.has(id)) {
-                        // Smooth animation for existing marker
+                        // Update existing marker
                         const marker = otherUsersMarkers.get(id).marker;
-                        const currentPos = marker.getLngLat();
-                        const newPos = [data.lng, data.lat];
-                        
-                        // Animate movement
-                        animateMarkerMovement(marker, currentPos, newPos);
-                        otherUsersMarkers.get(id).position = newPos;
+                        marker.setLngLat([data.lng, data.lat]);
+                        otherUsersMarkers.get(id).position = [data.lng, data.lat];
                     } else {
-                        // Create new marker with entrance animation
+                        // Create new marker
                         const el = document.createElement('div');
                         el.className = 'star-marker';
                         el.style.color = color;
-                        el.style.opacity = '0';
-                        el.style.transform = 'scale(0)';
                         
                         const marker = new mapboxgl.Marker(el)
                             .setLngLat([data.lng, data.lat])
                             .addTo(map);
-                        
-                        // Entrance animation
-                        setTimeout(() => {
-                            el.style.transition = 'all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-                            el.style.opacity = '1';
-                            el.style.transform = 'scale(1)';
-                        }, 100);
                         
                         otherUsersMarkers.set(id, {
                             marker: marker,
                             position: [data.lng, data.lat],
                             color: color
                         });
+                        
+                        console.log(`Added new user marker: ${id}`);
                     }
                 });
-        }
-        
-        function animateMarkerMovement(marker, from, to, duration = 1000) {
-            const start = performance.now();
-            
-            function frame(time) {
-                const elapsed = time - start;
-                const progress = Math.min(elapsed / duration, 1);
-                
-                // Easing function
-                const easeProgress = 1 - Math.pow(1 - progress, 3);
-                
-                const lat = from.lat + (to[1] - from.lat) * easeProgress;
-                const lng = from.lng + (to[0] - from.lng) * easeProgress;
-                
-                marker.setLngLat([lng, lat]);
-                
-                if (progress < 1) {
-                    requestAnimationFrame(frame);
-                }
-            }
-            
-            requestAnimationFrame(frame);
         }
         
         function removeUserMarker(id) {
             if (otherUsersMarkers.has(id)) {
                 const { marker } = otherUsersMarkers.get(id);
-                const el = marker.getElement();
-                
-                // Exit animation
-                el.style.transition = 'all 0.6s ease-out';
-                el.style.opacity = '0';
-                el.style.transform = 'scale(0)';
-                
-                setTimeout(() => {
-                    marker.remove();
-                    otherUsersMarkers.delete(id);
-                    updateUserCount();
-                }, 600);
+                marker.remove();
+                otherUsersMarkers.delete(id);
+                updateUserCount();
+                console.log(`Removed user marker: ${id}`);
             }
         }
         
         // ============================================
-        // ECHO MARKERS - ENHANCED
+        // ECHO MARKERS
         // ============================================
         
         function addEchoMarker(id, data) {
@@ -1149,25 +808,12 @@
             el.style.color = data.mood_color || '#667eea';
             el.style.borderColor = data.mood_color || '#667eea';
             el.innerHTML = echoTypes[data.content_type] || '✨';
-            el.style.opacity = '0';
-            el.style.transform = 'scale(0)';
             
             const marker = new mapboxgl.Marker(el)
                 .setLngLat([data.lng, data.lat])
                 .addTo(map);
             
-            // Entrance animation
-            setTimeout(() => {
-                el.style.transition = 'all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-                el.style.opacity = '1';
-                el.style.transform = 'scale(1)';
-            }, 100);
-            
             el.addEventListener('click', () => {
-                // Create ripple effect
-                createRippleEffect(el, data.mood_color);
-                
-                // Show echo details
                 showEchoDetails(data);
                 
                 // Update interaction count
@@ -1178,20 +824,6 @@
             });
             
             echoMarkers.set(id, marker);
-        }
-        
-        function createRippleEffect(element, color) {
-            const ripple = document.createElement('div');
-            ripple.style.position = 'absolute';
-            ripple.style.width = '100%';
-            ripple.style.height = '100%';
-            ripple.style.borderRadius = '50%';
-            ripple.style.border = `2px solid ${color}`;
-            ripple.style.pointerEvents = 'none';
-            ripple.style.animation = 'echoPing 1s ease-out';
-            element.appendChild(ripple);
-            
-            setTimeout(() => ripple.remove(), 1000);
         }
         
         function showEchoDetails(data) {
@@ -1215,10 +847,12 @@
             `;
             
             popup.innerHTML = `
-                <div style="font-size: 48px; margin-bottom: 15px;">${data.content_type === 'audio' ? '🎤' : 
+                <div style="font-size: 48px; margin-bottom: 15px;">${
+                    data.content_type === 'audio' ? '🎤' : 
                     data.content_type === 'photo' ? '📷' : 
                     data.content_type === 'video' ? '🎥' : 
-                    data.content_type === 'mood' ? '💭' : '💬'}</div>
+                    data.content_type === 'mood' ? '💭' : '💬'
+                }</div>
                 <div style="font-size: 18px; font-weight: 600; margin-bottom: 10px;">Echo Discovered!</div>
                 <div style="font-size: 14px; opacity: 0.8;">Type: ${data.content_type}</div>
                 <div style="font-size: 12px; opacity: 0.6; margin-top: 10px;">Tap outside to close</div>
@@ -1246,157 +880,145 @@
         function removeEchoMarker(id) {
             if (echoMarkers.has(id)) {
                 const marker = echoMarkers.get(id);
-                const el = marker.getElement();
-                
-                el.style.transition = 'all 0.6s ease-out';
-                el.style.opacity = '0';
-                el.style.transform = 'scale(0) rotate(180deg)';
-                
-                setTimeout(() => {
-                    marker.remove();
-                    echoMarkers.delete(id);
-                }, 600);
+                marker.remove();
+                echoMarkers.delete(id);
             }
         }
         
         // ============================================
-        // LOCATION TRACKING - ENHANCED
+        // LOCATION TRACKING - REAL GPS ONLY
         // ============================================
         
         function startLocationTracking() {
-            if (navigator.geolocation) {
-                navigator.geolocation.watchPosition(
-                    updatePosition,
-                    handleLocationError,
-                    { 
-                        enableHighAccuracy: true, 
-                        maximumAge: 3000, 
-                        timeout: 5000 
-                    }
-                );
-            } else {
-                simulateMovement();
+            console.log('Starting GPS tracking...');
+            updateGPSDebug('Requesting permission...');
+            
+            if (!navigator.geolocation) {
+                console.error('Geolocation not supported');
+                updateGPSDebug('Not supported!');
+                alert('GPS is not supported on this device/browser');
+                return;
             }
-        }
-        
-        function simulateMovement() {
-            let lat = 44.4808;
-            let lng = 26.1246;
-            let angle = 0;
             
-            updatePosition({
-                coords: {
-                    latitude: lat,
-                    longitude: lng,
-                    speed: 0,
-                    heading: 0,
-                    altitude: 121.6
+            // Request GPS with high accuracy
+            watchId = navigator.geolocation.watchPosition(
+                (position) => {
+                    console.log('GPS Update:', position);
+                    updateGPSDebug('Active', 
+                        position.coords.latitude, 
+                        position.coords.longitude, 
+                        position.coords.accuracy
+                    );
+                    updatePosition(position);
+                },
+                (error) => {
+                    console.error('GPS Error:', error);
+                    handleLocationError(error);
+                },
+                {
+                    enableHighAccuracy: true,
+                    maximumAge: 0,
+                    timeout: 10000
                 }
-            });
+            );
             
-            setInterval(() => {
-                angle += 0.1;
-                const radius = 0.0003;
-                lat = 44.4808 + Math.sin(angle) * radius;
-                lng = 26.1246 + Math.cos(angle) * radius;
-                
-                updatePosition({
-                    coords: {
-                        latitude: lat,
-                        longitude: lng,
-                        speed: Math.random() * 2,
-                        heading: (angle * 180 / Math.PI) % 360,
-                        altitude: 121.6 + Math.sin(angle * 2) * 5
-                    }
-                });
-            }, 3000);
+            // Also try to get immediate position
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    console.log('Initial position:', position);
+                    updatePosition(position);
+                },
+                (error) => {
+                    console.error('Initial position error:', error);
+                }
+            );
         }
         
         async function updatePosition(position) {
-            const { latitude, longitude, speed, heading, altitude } = position.coords;
+            const { latitude, longitude, speed, heading, altitude, accuracy } = position.coords;
+            
+            console.log(`Position update: ${latitude}, ${longitude}, accuracy: ${accuracy}m`);
             
             // Create or update user marker
             if (!userMarker) {
                 const el = document.createElement('div');
                 el.className = 'star-marker mine';
-                el.style.color = userColor;
+                el.style.color = userColor || '#00D4FF';
                 
                 userMarker = new mapboxgl.Marker(el)
                     .setLngLat([longitude, latitude])
                     .addTo(map);
                 
-                map.flyTo({
-                    center: [longitude, latitude],
-                    zoom: 16,
-                    pitch: 60,
-                    bearing: heading || 0,
-                    duration: 2000,
-                    essential: true
-                });
+                // Center map on first position
+                if (!hasInitialPosition) {
+                    hasInitialPosition = true;
+                    map.flyTo({
+                        center: [longitude, latitude],
+                        zoom: 17,
+                        duration: 2000,
+                        essential: true
+                    });
+                }
             } else {
                 userMarker.setLngLat([longitude, latitude]);
                 
-                // Smooth camera follow
-                if (Math.random() > 0.7) { // Don't update camera every time
-                    map.easeTo({
-                        center: [longitude, latitude],
-                        bearing: heading || map.getBearing(),
-                        duration: 1500
-                    });
-                }
-            }
-            
-            // Check if stationary for echo
-            if (speed < 0.5) {
-                if (!stationaryTimer) {
-                    stationaryTimer = setTimeout(() => {
-                        document.getElementById('echoButton').classList.add('visible');
-                        createPulseEffect();
-                    }, 5000);
-                }
-            } else {
-                clearTimeout(stationaryTimer);
-                stationaryTimer = null;
-                document.getElementById('echoButton').classList.remove('visible');
-                document.getElementById('echoMenu').classList.remove('visible');
+                // Optional: Follow user smoothly (uncomment if you want map to follow)
+                // map.easeTo({
+                //     center: [longitude, latitude],
+                //     duration: 1000
+                // });
             }
             
             lastPosition = { lat: latitude, lng: longitude };
             
             // Update in Supabase
-            await supabaseClient
-                .from('active_positions')
-                .upsert({
-                    user_id: userId,
-                    lat: latitude,
-                    lng: longitude,
-                    altitude: altitude || 0,
-                    speed: speed || 0,
-                    heading: heading || 0,
-                    updated_at: new Date().toISOString()
-                });
-            
-            // Update last_seen
-            await supabaseClient
-                .from('users')
-                .update({ last_seen: new Date().toISOString() })
-                .eq('id', userId);
-            
-            updateConstellations();
-        }
-        
-        function createPulseEffect() {
-            const button = document.getElementById('echoButton');
-            button.style.animation = 'buttonPulse 2s ease-in-out infinite';
+            try {
+                await supabaseClient
+                    .from('active_positions')
+                    .upsert({
+                        user_id: userId,
+                        lat: latitude,
+                        lng: longitude,
+                        altitude: altitude || 0,
+                        speed: speed || 0,
+                        heading: heading || 0,
+                        updated_at: new Date().toISOString()
+                    });
+                
+                // Update last_seen
+                await supabaseClient
+                    .from('users')
+                    .update({ last_seen: new Date().toISOString() })
+                    .eq('id', userId);
+                    
+                updateConstellations();
+            } catch (error) {
+                console.error('Error updating position in Supabase:', error);
+            }
         }
         
         function handleLocationError(error) {
-            console.error('Location error:', error);
-            simulateMovement();
+            let errorMessage = 'Unknown error';
+            
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMessage = 'Permission denied';
+                    alert('Please enable location services for this app');
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMessage = 'Position unavailable';
+                    break;
+                case error.TIMEOUT:
+                    errorMessage = 'Timeout';
+                    break;
+            }
+            
+            updateGPSDebug(errorMessage);
+            console.error('Location error:', errorMessage, error);
         }
         
         // ============================================
-        // CONSTELLATIONS - ENHANCED
+        // CONSTELLATIONS - SIMPLE LINES
         // ============================================
         
         function updateConstellations() {
@@ -1411,47 +1033,20 @@
                         user.position[1], user.position[0]
                     )
                 }))
-                .filter(user => user.distance < 1000)
+                .filter(user => user.distance < 500) // 500m range
                 .sort((a, b) => a.distance - b.distance)
-                .slice(0, 7);
+                .slice(0, 5); // Max 5 connections
             
-            // Create constellation pattern
-            nearbyUsers.forEach((user, index) => {
-                // Direct line to user
+            // Create lines to nearby users
+            nearbyUsers.forEach(user => {
                 features.push({
                     type: 'Feature',
-                    properties: {
-                        distance: user.distance,
-                        index: index
-                    },
                     geometry: {
                         type: 'LineString',
                         coordinates: [
                             [lastPosition.lng, lastPosition.lat],
                             user.position
                         ]
-                    }
-                });
-                
-                // Connect nearby users to each other
-                nearbyUsers.slice(index + 1).forEach(otherUser => {
-                    const interUserDistance = calculateDistance(
-                        user.position[1], user.position[0],
-                        otherUser.position[1], otherUser.position[0]
-                    );
-                    
-                    if (interUserDistance < 500) {
-                        features.push({
-                            type: 'Feature',
-                            properties: {
-                                distance: interUserDistance,
-                                secondary: true
-                            },
-                            geometry: {
-                                type: 'LineString',
-                                coordinates: [user.position, otherUser.position]
-                            }
-                        });
                     }
                 });
             });
@@ -1463,7 +1058,7 @@
         }
         
         function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371000;
+            const R = 6371000; // Earth radius in meters
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
             const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
@@ -1474,40 +1069,27 @@
         }
         
         // ============================================
-        // EVENT LISTENERS - ENHANCED
+        // EVENT LISTENERS
         // ============================================
         
         function setupEventListeners() {
-            // Echo button with haptic feedback simulation
+            // Echo button - always visible
             const echoButton = document.getElementById('echoButton');
             echoButton.addEventListener('click', () => {
-                // Visual feedback
-                echoButton.style.transform = 'translateX(-50%) scale(0.95)';
-                setTimeout(() => {
-                    echoButton.style.transform = 'translateX(-50%) scale(1)';
-                }, 100);
-                
-                // Toggle menu
                 const menu = document.getElementById('echoMenu');
                 menu.classList.toggle('visible');
                 
-                // Vibration API if available
+                // Vibration feedback if available
                 if (navigator.vibrate) {
                     navigator.vibrate(50);
                 }
             });
             
-            // Echo options with enhanced interaction
+            // Echo options
             document.querySelectorAll('.echo-option').forEach(option => {
                 option.addEventListener('click', (e) => {
                     const type = e.currentTarget.dataset.type;
-                    
-                    // Visual feedback
-                    e.currentTarget.style.transform = 'scale(0.9)';
-                    setTimeout(() => {
-                        e.currentTarget.style.transform = 'scale(1)';
-                    }, 200);
-                    
+                    console.log(`Echo type selected: ${type}`);
                     dropEcho(type);
                     
                     if (navigator.vibrate) {
@@ -1524,51 +1106,55 @@
                         .delete()
                         .eq('user_id', userId);
                 }
-            });
-            
-            // Handle visibility change
-            document.addEventListener('visibilitychange', () => {
-                if (document.hidden) {
-                    // Pause animations when hidden
-                    document.querySelectorAll('.star-marker').forEach(el => {
-                        el.style.animationPlayState = 'paused';
-                    });
-                } else {
-                    // Resume animations
-                    document.querySelectorAll('.star-marker').forEach(el => {
-                        el.style.animationPlayState = 'running';
-                    });
+                
+                if (watchId) {
+                    navigator.geolocation.clearWatch(watchId);
                 }
             });
         }
         
         // ============================================
-        // DROP ECHO - ENHANCED
+        // DROP ECHO
         // ============================================
         
         async function dropEcho(type) {
-            if (!lastPosition) return;
+            if (!lastPosition) {
+                alert('No GPS position available');
+                return;
+            }
             
             const echoId = crypto.randomUUID();
             const color = generateStarColor();
             
+            console.log(`Dropping ${type} echo at:`, lastPosition);
+            
             // Create echo in database
-            await supabaseClient
-                .from('echoes')
-                .insert({
-                    id: echoId,
-                    user_id: userId,
-                    lat: lastPosition.lat,
-                    lng: lastPosition.lng,
-                    content_type: type,
-                    mood_color: color
-                });
-            
-            // Hide menu
-            document.getElementById('echoMenu').classList.remove('visible');
-            
-            // Create visual effect at location
-            createEchoDropEffect(lastPosition, color);
+            try {
+                const { error } = await supabaseClient
+                    .from('echoes')
+                    .insert({
+                        id: echoId,
+                        user_id: userId,
+                        lat: lastPosition.lat,
+                        lng: lastPosition.lng,
+                        content_type: type,
+                        mood_color: color
+                    });
+                    
+                if (error) {
+                    console.error('Error creating echo:', error);
+                    alert('Failed to create echo');
+                } else {
+                    console.log('Echo created successfully');
+                    // Hide menu
+                    document.getElementById('echoMenu').classList.remove('visible');
+                    
+                    // Visual feedback
+                    createEchoDropEffect(lastPosition, color);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
         }
         
         function createEchoDropEffect(position, color) {
@@ -1596,40 +1182,15 @@
             });
             
             setTimeout(() => marker.remove(), 1500);
-            
-            // Create particle burst
-            for (let i = 0; i < 8; i++) {
-                const particle = document.createElement('div');
-                particle.style.cssText = `
-                    width: 4px;
-                    height: 4px;
-                    background: ${color};
-                    border-radius: 50%;
-                    pointer-events: none;
-                `;
-                
-                const angle = (i / 8) * Math.PI * 2;
-                const distance = 50 + Math.random() * 50;
-                
-                const pMarker = new mapboxgl.Marker(particle)
-                    .setLngLat([position.lng, position.lat])
-                    .addTo(map);
-                
-                setTimeout(() => {
-                    particle.style.transition = 'all 1s ease-out';
-                    particle.style.transform = `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px)`;
-                    particle.style.opacity = '0';
-                }, 10);
-                
-                setTimeout(() => pMarker.remove(), 1000);
-            }
         }
         
         // ============================================
         // INITIALIZATION
         // ============================================
         
+        console.log('Starting Constellation Walker...');
         userId = getOrCreateUserId();
+        console.log('User ID:', userId);
         initMap();
     </script>
 </body>
