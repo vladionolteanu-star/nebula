@@ -1265,22 +1265,31 @@
         // ============================================
         
         function startLocationTracking() {
-            if (navigator.geolocation) {
-                navigator.geolocation.watchPosition(
-                    updatePosition,
-                    handleLocationError,
-                    { 
-                        enableHighAccuracy: true, 
-                        maximumAge: 3000, 
-                        timeout: 5000 
+    if (navigator.geolocation) {
+        // Urmărește poziția real-time ca în Google Maps
+        navigator.geolocation.watchPosition(
+            updatePosition,
+            (error) => {
+                console.error('GPS Error:', error);
+                // Fallback doar dacă GPS nu merge deloc
+                updatePosition({
+                    coords: {
+                        latitude: 44.4808,
+                        longitude: 26.1246,
+                        speed: 0,
+                        heading: 0,
+                        altitude: 0
                     }
-                );
-            } else {
-    // Nu mai simula nimic - doar așteaptă GPS real
-    console.log('Waiting for GPS...');
+                });
+            },
+            { 
+                enableHighAccuracy: true, 
+                maximumAge: 1000, 
+                timeout: 5000 
+            }
+        );
+    }
 }
-        }
-        
         function simulateMovement() {
             let lat = 44.4808;
             let lng = 26.1246;
