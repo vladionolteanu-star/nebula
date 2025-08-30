@@ -927,9 +927,10 @@
                 idleTimer = setTimeout(startAutoRotate, 30000); // Start rotating after 30s idle
             }
             
-            map.on('move', resetIdleTimer);
-            map.on('click', resetIdleTimer);
-            resetIdleTimer();
+            // DEZACTIVAT - nu mai rotește automat
+// map.on('move', resetIdleTimer);
+// map.on('click', resetIdleTimer);
+// resetIdleTimer();
         }
         
         // ============================================
